@@ -13,6 +13,7 @@ class CTLEarlyStopping:
         self.min_delta = abs(min_delta)
         self.wait = 0
         self.stop_training = False
+        self.improvement = False
 
         if mode not in ['auto', 'min', 'max']:
             logging.warning('EarlyStopping mode %s is unknown, '
@@ -39,14 +40,16 @@ class CTLEarlyStopping:
     
     def check_progress(self, current):
         if self.monitor_op(current - self.min_delta, self.best):
+            print(f"{self.monitor} improved from {self.best:.4f} to {current:.4f}.", end=" ")
             self.best = current
-            print(f"{self.monitor} improved")
             self.wait = 0
+            self.improvement = True
         else:
             self.wait += 1
+            self.improvement = False
             print(f"{self.monitor} didn't improve")
             if self.wait >= self.patience:
                 print("Early stopping")
                 self.stop_training = True
                 
-        return self.stop_training
+        return self.improvement, self.stop_training
