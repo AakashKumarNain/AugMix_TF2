@@ -69,9 +69,12 @@ def main():
     batch_size = args["batch_size"]
     num_epochs = args["epochs"]
     save_dir_path = args["save_dir_path"]
+    if save_dir_path == "":
+        save_dir_path = './model_checkpoints'
+
 
     # get the data
-    print("\nLoading data now")
+    print("\nLoading data now.", end=" ")
     x_train, y_train, x_test, y_test, y_train_cat, y_test_cat = get_cifar_data()
     training_data = [x_train, y_train, y_train_cat]
     validation_data = [x_test, y_test, y_test_cat]
@@ -84,7 +87,7 @@ def main():
             nb_epochs=num_epochs,
             min_lr=min_lr,
             max_lr=max_lr,
-            save_dri_path=save_dir_path)
+            save_dir_path=save_dir_path)
     
 
 ###########################################################################  
