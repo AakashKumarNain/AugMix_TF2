@@ -110,7 +110,7 @@ def train(training_data,
             nb_epochs=100,
             min_lr=1e-5,
             max_lr=1.0,
-            save_dri_path=""):
+            save_dir_path=""):
     
 
     x_train, y_train, y_train_cat = training_data
@@ -136,6 +136,10 @@ def train(training_data,
     
     # get the optimizer
     optim = optimizers.SGD(learning_rate=get_lr(0))
+    
+    # checkpoint prefix
+    checkpoint_prefix = os.path.join(save_dir_path, "ckpt")
+    checkpoint = tf.train.Checkpoint(optimizer=optim, model=model)
     
     print("Starting training: \n")
     for epoch in range(nb_epochs):
@@ -184,9 +188,14 @@ def train(training_data,
                 train_loss: {loss:.6f}  train_acc: {acc*100:.2f}%  
                 test_loss:  {val_loss:.6f}  test_acc:  {val_acc*100:.2f}%""")
         print("")
-
-        # check progress using earlystopping
-        if es.check_progress(val_loss):
+        
+        # get the model progress
+        improved, stop_training = es.check_progress(val_loss)
+        # check if performance of model has imporved or not
+        if improved:
+            print("Saving model checkpoint.")
+            checkpoint.save(checkpoint_prefix)
+        if stop_training:
             break
                 
         
