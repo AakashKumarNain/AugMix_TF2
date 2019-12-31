@@ -9,7 +9,6 @@ The [official code](https://github.com/google-research/augmix) is in PyTorch. Th
 for the same work. 
 
 # Requirements
-dask>=2.9<br>
 numpy>= 1.17<br>
 Pillow>=6.2<br>
 tensorflow==2.0<br>
