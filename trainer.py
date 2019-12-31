@@ -13,7 +13,7 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.callbacks import LearningRateScheduler, EarlyStopping
 from tensorflow.keras.callbacks import Callback, ModelCheckpoint
 from tensorflow.keras.regularizers import l2
-from tensorflow.keras.utils import OrderedEnqueuer
+from tensorflow.keras.utils import OrderedEnqueuer, Progbar
 from models.resnet20 import resnet_v1
 from data_generator import DataGenerator
 from utils import CTLEarlyStopping
@@ -45,6 +45,9 @@ lr_max, lr_min = None, None
 
 # earlystopping for custom training loops
 es = CTLEarlyStopping(monitor="val_loss", mode="min", patience=5)
+
+# keep history to record everything
+history = {'train_loss':[], "train_acc":[], "valid_loss":[], "valid_acc":[]}
 
 ###################################################################################
 
@@ -140,15 +143,19 @@ def train(training_data,
     # checkpoint prefix
     checkpoint_prefix = os.path.join(save_dir_path, "ckpt")
     checkpoint = tf.train.Checkpoint(optimizer=optim, model=model)
+
     
-    print("Starting training: \n")
+    #print("Starting training: \n")
     for epoch in range(nb_epochs):
-        start = time.time()
+        # start = time.time()
+        pbar = Progbar(target=nb_train_steps, interval=0.5, width=50)
+
         # Train for an epoch and keep track of 
         # loss and accracy for each batch.
         for bno, (images, labels) in enumerate(train_ds):
             if bno==nb_train_steps:
                 break
+
             # Get the batch data 
             clean, aug1, aug2 = images
             loss_value, y_pred_clean = train_step(clean, aug1, aug2, labels, optim)
@@ -156,7 +163,7 @@ def train(training_data,
             # Record batch loss and batch accuracy
             train_loss(loss_value)
             train_accuracy(labels, y_pred_clean)
-
+            pbar.update(bno+1)
     
         # Validate after each epoch
         for bno in range(nb_test_steps):
@@ -181,6 +188,13 @@ def train(training_data,
         val_loss = test_loss.result()
         val_acc = test_accuracy.result()
 
+        # record in the history object
+        history['train_loss'].append(loss)
+        history['train_acc'].append(acc)
+        history['valid_loss'].append(val_loss)
+        history['valid_acc'].append(val_acc)
+
+        print("")
 
         # print loss values and accuracy values for each epoch 
         # for both training as well as validation sets
@@ -205,6 +219,7 @@ def train(training_data,
         test_loss.reset_states() 
         test_accuracy.reset_states()
         
-        end = time.time()
-        print(f"Time taken for epoch {epoch+1}:  {end-start:.3f} seconds")
-        print("="*78)
+        # end = time.time()
+        # print(f"Time taken for epoch {epoch+1}:  {end-start:.3f} seconds")
+        print("*"*78)
+        print("")
