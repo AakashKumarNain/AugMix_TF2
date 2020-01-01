@@ -16,7 +16,11 @@ from tensorflow.keras.regularizers import l2
 from tensorflow.keras.utils import OrderedEnqueuer, Progbar
 from models.resnet20 import resnet_v1
 from data_generator import DataGenerator
-from utils import CTLEarlyStopping
+from utils import CTLEarlyStopping, CTLHistory
+
+seed=1234
+np.random.seed(seed)
+tf.random.set_seed(seed)
 
 
 ###################################################################################
@@ -46,8 +50,8 @@ lr_max, lr_min = None, None
 # earlystopping for custom training loops
 es = CTLEarlyStopping(monitor="val_loss", mode="min", patience=5)
 
-# keep history to record everything
-history = {'train_loss':[], "train_acc":[], "valid_loss":[], "valid_acc":[]}
+# history object to plot and save progression in the end
+history = CTLHistory()
 
 ###################################################################################
 
@@ -95,7 +99,6 @@ def train_step(clean, aug1, aug2, labels, optim):
     return loss_value, y_pred_clean
 
 
-###################################################################################
 
 @tf.function
 def validate_step(images, labels):
@@ -106,6 +109,7 @@ def validate_step(images, labels):
 
 
 ###################################################################################
+
 
 def train(training_data, 
             validation_data, 
@@ -137,23 +141,40 @@ def train(training_data,
     lr_max = max_lr
     lr_min = min_lr
     
+    
     # get the optimizer
     optim = optimizers.SGD(learning_rate=get_lr(0))
     
     # checkpoint prefix
     checkpoint_prefix = os.path.join(save_dir_path, "ckpt")
     checkpoint = tf.train.Checkpoint(optimizer=optim, model=model)
-
+    checkpoint_manager = tf.train.CheckpointManager(checkpoint, 
+                                                    directory=save_dir_path,
+                                                    max_to_keep=10)
     
-    #print("Starting training: \n")
-    for epoch in range(nb_epochs):
-        # start = time.time()
-        pbar = Progbar(target=nb_train_steps, interval=0.5, width=50)
+    # check for previous checkpoints, if any
+    checkpoint.restore(checkpoint_manager.latest_checkpoint)
+    if checkpoint_manager.latest_checkpoint:
+        print("Checkpoint restored from {}".format(checkpoint_manager.latest_checkpoint))
+        starting_epoch = checkpoint.save_counter.numpy()
+    else:
+        print("Initializing from scratch.")
+        starting_epoch = 0
+        
+    # sanity check for epoch number. For example, if someone restored a checkpoint
+    # from 15th epoch and want to train for two more epochs, then we need to explicitly
+    # encode this logic in the for loop
+    if nb_epochs <= starting_epoch:
+        nb_epochs += starting_epoch
+    
+    
+    for epoch in range(starting_epoch, nb_epochs):
+        pbar = Progbar(target=nb_train_steps, interval=0.5, width=30)
 
         # Train for an epoch and keep track of 
         # loss and accracy for each batch.
         for bno, (images, labels) in enumerate(train_ds):
-            if bno==nb_train_steps:
+            if bno == nb_train_steps:
                 break
 
             # Get the batch data 
@@ -188,20 +209,14 @@ def train(training_data,
         val_loss = test_loss.result()
         val_acc = test_accuracy.result()
 
-        # record in the history object
-        history['train_loss'].append(loss)
-        history['train_acc'].append(acc)
-        history['valid_loss'].append(val_loss)
-        history['valid_acc'].append(val_acc)
-
-        print("")
+        # record values in the history object
+        history.update([loss, acc], [val_loss, val_acc])
 
         # print loss values and accuracy values for each epoch 
         # for both training as well as validation sets
         print(f"""Epoch: {epoch+1} 
                 train_loss: {loss:.6f}  train_acc: {acc*100:.2f}%  
-                test_loss:  {val_loss:.6f}  test_acc:  {val_acc*100:.2f}%""")
-        print("")
+                test_loss:  {val_loss:.6f}  test_acc:  {val_acc*100:.2f}%\n""")
         
         # get the model progress
         improved, stop_training = es.check_progress(val_loss)
@@ -211,6 +226,9 @@ def train(training_data,
             checkpoint.save(checkpoint_prefix)
         if stop_training:
             break
+            
+        # plot and save progression
+        history.plot_and_save(initial_epoch=starting_epoch)
                 
         
         # Reset the losses and accuracy
@@ -218,8 +236,6 @@ def train(training_data,
         train_accuracy.reset_states()
         test_loss.reset_states() 
         test_accuracy.reset_states()
-        
-        # end = time.time()
-        # print(f"Time taken for epoch {epoch+1}:  {end-start:.3f} seconds")
+        print("")
         print("*"*78)
         print("")
