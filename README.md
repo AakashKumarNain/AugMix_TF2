@@ -8,12 +8,18 @@ models but also contributes in improving the robustness of the models.
 The [official code](https://github.com/google-research/augmix) is in PyTorch. This is a just a port from PyTorch to Tensorflow 2.0
 for the same work. 
 
-# Requirements
+## Requirements
 numpy>= 1.17<br>
 Pillow>=6.2<br>
 tensorflow==2.0<br>
 
-# Citation
+## TODO:
+- [x] Make everything modular
+- [x] Custom **Early Stopping** and **History** for custom training loops
+- [ ] Distributed training
+
+
+## Citation
 ```
 @article{hendrycks2020augmix,
   title={{AugMix}: A Simple Data Processing Method to Improve Robustness and Uncertainty},
