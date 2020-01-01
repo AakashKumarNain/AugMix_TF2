@@ -1,5 +1,6 @@
 import logging
 import numpy as np
+import matplotlib.pyplot as plt
 
 class CTLEarlyStopping:
     def __init__(self,
@@ -53,3 +54,48 @@ class CTLEarlyStopping:
                 self.stop_training = True
                 
         return self.improvement, self.stop_training
+    
+    
+    
+    
+class CTLHistory:
+    def __init__(self):
+        self.history = {'train_loss':[], 
+                        "train_acc":[], 
+                        "val_loss":[], 
+                        "val_acc":[]}
+    
+    def update(self, train_stats, val_stats):
+        train_loss, train_acc = train_stats
+        val_loss, val_acc = val_stats
+        
+        self.history['train_loss'].append(train_loss)
+        self.history['train_acc'].append(np.round(train_acc*100))
+        self.history['val_loss'].append(val_loss)
+        self.history['val_acc'].append(np.round(val_acc*100))
+        
+        
+    def plot_and_save(self, initial_epoch=0):
+        train_loss = self.history['train_loss']
+        train_acc = self.history['train_acc']
+        val_loss = self.history['val_loss']
+        val_acc = self.history['val_acc']
+        
+        epochs = [(i+initial_epoch) for i in range(len(train_loss))]
+        
+        f, ax = plt.subplots(1, 2, figsize=(15,8))
+        ax[0].plot(epochs, train_loss)
+        ax[0].plot(epochs, val_loss)
+        ax[0].set_title('loss progression')
+        ax[0].set_xlabel('Epochs')
+        ax[0].set_ylabel('loss values')
+        ax[0].legend(['training', 'validation'])
+        
+        ax[1].plot(epochs, train_acc)
+        ax[1].plot(epochs, val_acc)
+        ax[1].set_title('accuracy progression')
+        ax[1].set_xlabel('Epochs')
+        ax[1].set_ylabel('Accuracy')
+        ax[1].legend(['training', 'validation'])
+        
+        plt.savefig('history.png')
