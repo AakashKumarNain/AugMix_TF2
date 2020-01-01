@@ -56,7 +56,8 @@ class CTLEarlyStopping:
         return self.improvement, self.stop_training
     
     
-    
+##########################################################################################
+
     
 class CTLHistory:
     def __init__(self):
