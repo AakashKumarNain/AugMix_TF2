@@ -9,9 +9,17 @@ The [official code](https://github.com/google-research/augmix) is in PyTorch. Th
 for the same work. 
 
 ## Requirements
+Python>=3.6.x<br>
 numpy>= 1.17<br>
 Pillow>=6.2<br>
 tensorflow==2.0<br>
+
+## Usage:
+I always recommend using `anaconda` for managing your environments but you can use `virtualenv` as well or you can directly install packages. It's your choice.
+
+1. Clone the repo.
+2. `pip install requirements.txt`
+3. `python main.py --batch_size=128 --epochs=100`
 
 ## TODO:
 - [x] Make everything modular
