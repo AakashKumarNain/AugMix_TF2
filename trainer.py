@@ -95,8 +95,8 @@ def train_step(clean, aug1, aug2, labels, optim):
                             y_pred_aug1 = y_pred_aug1,
                             y_pred_aug2 = y_pred_aug2)
         
-    grads = tape.gradient(loss_value, model.trainable_weights)
-    optim.apply_gradients(zip(grads, model.trainable_weights))
+    grads = tape.gradient(loss_value, model.trainable_variables)
+    optim.apply_gradients(zip(grads, model.trainable_variables))
     return loss_value, y_pred_clean
 
 
