@@ -5,8 +5,7 @@ consistent embeddings of the augmented images, which results in increased robust
 technique achieves much better results as compared to other augmentation techniques. Not only it imporoves the accuracy of the
 models but also contributes in improving the robustness of the models.
 
-The [official code](https://github.com/google-research/augmix) is in PyTorch. This is a just a port from PyTorch to Tensorflow 2.0
-for the same work. 
+The [official code](https://github.com/google-research/augmix) is in PyTorch. This is a just a port from PyTorch to Tensorflow 2.0 for the same work. I used `ResNet20` as an example for the model but you can use whatever model you like.
 
 ## Requirements
 Python>=3.6.x<br>
