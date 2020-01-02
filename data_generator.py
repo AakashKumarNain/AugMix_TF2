@@ -1,8 +1,10 @@
+import os
 import logging
 import numpy as np
 from PIL import Image
 from PIL import ImageOps
 
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2" 
 import tensorflow as tf
 tf.get_logger().setLevel(logging.ERROR)
 from tensorflow.keras.utils import Sequence, to_categorical
