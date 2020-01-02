@@ -109,3 +109,4 @@ class CTLHistory:
         ax[1].legend(['training', 'validation'])
         
         plt.savefig(self.plot_name)
+        plt.close()
