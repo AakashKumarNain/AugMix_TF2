@@ -138,13 +138,14 @@ def train(training_data,
     nb_test_steps = int(np.ceil(len(x_test) / batch_size))
     
     global total_steps, lr_max, lr_min
-    total_steps = nb_train_steps
+    total_steps = nb_train_steps * nb_epochs
     lr_max = max_lr
     lr_min = min_lr
     
     
     # get the optimizer
-    optim = optimizers.SGD(learning_rate=get_lr(0))
+    optim = optimizers.SGD(learning_rate=get_lr(0)) 
+                           
     
     # checkpoint prefix
     checkpoint_prefix = os.path.join(save_dir_path, "ckpt")
@@ -157,7 +158,7 @@ def train(training_data,
     checkpoint.restore(checkpoint_manager.latest_checkpoint)
     if checkpoint_manager.latest_checkpoint:
         print("Checkpoint restored from {}".format(checkpoint_manager.latest_checkpoint))
-        starting_epoch = checkpoint.save_counter.numpy()
+        starting_epoch = checkpoint.save_counter.numpy()       
     else:
         print("Initializing from scratch.")
         starting_epoch = 0
