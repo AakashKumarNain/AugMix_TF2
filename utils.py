@@ -1,3 +1,4 @@
+import os
 import logging
 import numpy as np
 import matplotlib.pyplot as plt
@@ -60,12 +61,20 @@ class CTLEarlyStopping:
 
     
 class CTLHistory:
-    def __init__(self):
+    def __init__(self, save_dir='plots'):
         self.history = {'train_loss':[], 
                         "train_acc":[], 
                         "val_loss":[], 
                         "val_acc":[]}
+        self.save_dir = save_dir
+        
+        if not os.path.exists(self.save_dir):
+            os.mkdir(self.save_dir)
+
+        self.plot_name = os.path.join(self.save_dir, "history.png")
     
+   
+  
     def update(self, train_stats, val_stats):
         train_loss, train_acc = train_stats
         val_loss, val_acc = val_stats
@@ -99,4 +108,4 @@ class CTLHistory:
         ax[1].set_ylabel('Accuracy')
         ax[1].legend(['training', 'validation'])
         
-        plt.savefig('history.png')
+        plt.savefig(self.plot_name)
