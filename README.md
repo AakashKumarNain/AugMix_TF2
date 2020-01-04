@@ -13,6 +13,10 @@ numpy>= 1.17<br>
 Pillow>=6.2<br>
 tensorflow==2.0<br>
 
+### Update 4th Jan, 20202
+
+**There is a nasty bug in the code somehwere which is causing `nan` in losses!**
+
 ## Usage:
 I always recommend using `anaconda` for managing your environments but you can use `virtualenv` as well or you can directly install packages. It's your choice.
 
