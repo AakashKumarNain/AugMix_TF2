@@ -1,8 +1,3 @@
-### Update 4th Jan, 2020
-**There is a nasty bug in the code somehwere which is causing `nan` in losses!**
-
----
-
 # AugMix
 
 [Augmix](https://arxiv.org/pdf/1912.02781.pdf) is a new a data processing technique that mixes augmented images and enforces
