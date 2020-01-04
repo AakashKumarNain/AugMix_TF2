@@ -3,6 +3,7 @@ import time
 import logging
 import multiprocessing
 import numpy as np
+import config
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2" 
 import tensorflow as tf
@@ -42,17 +43,17 @@ test_accuracy = tf.keras.metrics.CategoricalAccuracy()
 train_loss = tf.keras.metrics.Mean()
 test_loss = tf.keras.metrics.Mean()
 
-# initialize total steps to None and update it from main file
+# initialize total steps to None and update it from config file
 total_steps = None
 
-# same for min_lr and max_lr
-lr_max, lr_min = None, None
+lr_max = config.max_lr
+lr_min = config.min_lr
 
 # earlystopping for custom training loops
 es = CTLEarlyStopping(monitor="val_loss", mode="min", patience=5)
 
 # history object to plot and save progression in the end
-history = CTLHistory()
+history = CTLHistory(filename=config.plot_name)
 
 ###################################################################################
 
@@ -62,11 +63,10 @@ def jsd_loss_fn(y_true, y_pred_clean, y_pred_aug1, y_pred_aug2):
     loss = entropy(y_true, y_pred_clean)
 
     mixture = (y_pred_clean + y_pred_aug1 + y_pred_aug2) / 3.
-    mixture = tf.math.log(tf.clip_by_value(mixture, 1e-7, 1.))
 
-    loss += 12. * (kld(mixture, y_pred_clean) + 
-                    kld(mixture, y_pred_aug1) +
-                    kld(mixture, y_pred_aug2)) / 3.
+    loss += 12. * (kld(y_pred_clean, mixture) + 
+                   kld(y_pred_aug1, mixture) +
+                   kld(y_pred_aug2, mixture)) / 3.
     return loss
 
 ###################################################################################
@@ -137,14 +137,13 @@ def train(training_data,
     nb_train_steps = int(np.ceil(len(x_train) / batch_size))
     nb_test_steps = int(np.ceil(len(x_test) / batch_size))
     
-    global total_steps, lr_max, lr_min
-    total_steps = nb_train_steps * nb_epochs
-    lr_max = max_lr
-    lr_min = min_lr
-    
-    
+    global total_steps
+    total_steps = nb_train_steps * config.num_epochs
+
+
     # get the optimizer
-    optim = optimizers.SGD(learning_rate=get_lr(0)) 
+    # SGD with cosine lr is causing NaNs. Need to investigate more
+    optim = optimizers.Adam(learning_rate=0.0001) 
                            
     
     # checkpoint prefix
