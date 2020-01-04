@@ -2,6 +2,7 @@ import os
 import argparse
 import logging
 import numpy as np
+import config
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2" 
 import tensorflow as tf
@@ -47,10 +48,19 @@ def parse_args():
                         help='minimum learning rate for lr scheduler',
                         default=1e-5,
                         type=float)
+    parser.add_argument('--img_size',
+                        help='size of the images',
+                        default=32,
+                        type=int)
     parser.add_argument("--save_dir_path",
                         type=str,
                         help="dir path to save output results",
                         default="",
+                        required=False)
+    parser.add_argument("--plot_name",
+                        type=str,
+                        help="filename for the plots",
+                        default="history.png",
                         required=False)
     args = vars(parser.parse_args())
     return args
@@ -65,13 +75,18 @@ def main():
     print("="*78)
 
     # get the command line args
-    max_lr = args["max_lr"]
-    min_lr = args["min_lr"]
-    batch_size = args["batch_size"]
-    num_epochs = args["epochs"]
-    save_dir_path = args["save_dir_path"]
-    if save_dir_path == "":
-        save_dir_path = './model_checkpoints'
+    config.max_lr = args["max_lr"]
+    config.min_lr = args["min_lr"]
+    config.batch_size = args["batch_size"]
+    config.num_epochs = args["epochs"]
+    config.IMAGE_SIZE = args["img_size"]
+    config.plt_name = args["plot_name"]
+    
+    if args["save_dir_path"] == "":
+        config.save_dir_path = './model_checkpoints'
+    else:
+        config.save_dir_path = args["save_dir_path"]
+        
 
 
     # get the data
@@ -84,11 +99,11 @@ def main():
     # pass the arguments to the trainer
     train(training_data=training_data,
             validation_data=validation_data,
-            batch_size=batch_size, 
-            nb_epochs=num_epochs,
-            min_lr=min_lr,
-            max_lr=max_lr,
-            save_dir_path=save_dir_path)
+            batch_size=config.batch_size, 
+            nb_epochs=config.num_epochs,
+            min_lr=config.min_lr,
+            max_lr=config.max_lr,
+            save_dir_path=config.save_dir_path)
     
 
 ###########################################################################  
