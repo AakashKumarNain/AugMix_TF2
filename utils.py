@@ -61,17 +61,20 @@ class CTLEarlyStopping:
 
     
 class CTLHistory:
-    def __init__(self, save_dir='plots'):
+    def __init__(self,
+                 filename="history.png",
+                 save_dir='plots'):
+        
         self.history = {'train_loss':[], 
                         "train_acc":[], 
                         "val_loss":[], 
                         "val_acc":[]}
-        self.save_dir = save_dir
         
+        self.save_dir = save_dir
         if not os.path.exists(self.save_dir):
             os.mkdir(self.save_dir)
 
-        self.plot_name = os.path.join(self.save_dir, "history.png")
+        self.plot_name = os.path.join(self.save_dir, filename)
     
    
   
