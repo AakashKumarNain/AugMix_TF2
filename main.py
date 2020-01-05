@@ -80,7 +80,7 @@ def main():
     config.batch_size = args["batch_size"]
     config.num_epochs = args["epochs"]
     config.IMAGE_SIZE = args["img_size"]
-    config.plt_name = args["plot_name"]
+    config.plot_name = args["plot_name"]
     
     if args["save_dir_path"] == "":
         config.save_dir_path = './model_checkpoints'
